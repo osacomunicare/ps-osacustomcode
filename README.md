@@ -1,52 +1,72 @@
-# OSA Custom Code for PrestaShop
+OSA Custom Code for PrestaShop
 
-**Sviluppato da:** [OsaComunicare](https://osacomunicare.it)  
-**Supporto:** 800 911 329  
-**Versione:** 1.1.0  
-**Compatibilità:** PrestaShop 8.x / 9.x  
-**Licenza:** Academic Free License (AFL 3.0)
+Sviluppato da: OsaComunicare
 
-## 📝 Descrizione
-**OSA Custom Code** è un modulo professionale per PrestaShop progettato per la gestione centralizzata di snippet di codice personalizzati. Permette di iniettare CSS, Meta Tag e JavaScript in punti strategici del sito senza modificare i file del tema o il core di PrestaShop.
+Supporto: 800 911 329
 
-L'interfaccia è stata progettata per essere pulita, ordinata e intuitiva, seguendo l'identità visiva di OsaComunicare.
+Versione: 1.1.0 (DiaEvent Definitive)
 
-## ✨ Caratteristiche principali
+Compatibilità: PrestaShop 1.7.x / 8.x / 9.x
+📝 Descrizione
 
-L'amministrazione è suddivisa in tre sezioni (Tab) indipendenti per evitare confusione tra codice estetico, funzionale e di tracciamento:
+OSA Custom Code è lo strumento professionale definitivo per la gestione di snippet di codice personalizzati su PrestaShop. A differenza dei moduli standard, è progettato per garantire che nessun filtro di sicurezza del server o del database possa mai corrompere o eliminare i tuoi script.
+🛡️ La Forza della Scelta Tecnica: File System vs Database
 
-### 1. CSS
-- **Personalizzazioni Globali:** Una finestra dedicata esclusivamente alle direttive CSS.
-- **Iniezione Automatica:** Il modulo avvolge il codice nel tag `<style>` in modo trasparente.
+La maggior parte dei moduli (come HTML Box) salva il codice all'interno del database (tabella ps_configuration). Questa pratica espone il codice a rischi costanti:
 
-### 2. HEADER
-- **Codice Personalizzato (HTML/Meta):** Ideale per Verification Tags, Dati Strutturati (JSON-LD) e Meta Tag SEO.
-- **Script Java:** Finestra separata per JavaScript che deve essere caricato nel `<head>`.
+    Nessuna Corruzione: Il codice non viene "pulito" o tagliato dall'HTML Purifier di PrestaShop o dai firewall SQL.
 
-### 3. BODY
-- **Codice Personalizzato (HTML):** Inserimento di widget o elementi HTML a fine pagina.
-- **Script Java:** Ideale per Pixel di tracciamento (Facebook, Google Analytics) e script asincroni da caricare prima della chiusura del tag `</body>`.
+    Performance Superiori: La lettura diretta da file è estremamente più leggera per il server rispetto a una query SQL.
 
-## 🎨 Interfaccia "Osa Style"
-- **Design Pulito:** Finestre di editing chiare (Light Mode) per una migliore leggibilità.
-- **Focus Visivo:** Barra laterale e accenti cromatici in Verde OSA (`#5F8C5E`).
-- **Editor Avanzato:** Supporto per font monospaced e barre di scorrimento laterali per gestire lunghe porzioni di codice.
+    Affidabilità Totale: Anche i JavaScript più complessi o i CSS con caratteri speciali vengono conservati esattamente come li hai scritti, senza bisogno di "trucchi" di codifica.
 
-## 🚀 Installazione
+🚚 Portabilità Estrema (Easy Porting)
 
-1. Crea uno zip della cartella chiamato `osacustomcode.zip`.
-2. Assicurati che la cartella principale interna si chiami esattamente `osacustomcode`.
-3. Nel pannello di amministrazione di PrestaShop, vai su **Moduli** > **Gestione Moduli**.
-4. Clicca su **Carica un modulo** e trascina il file zip.
-5. Clicca su **Installa** e poi su **Configura**.
+Uno dei vantaggi esclusivi dell'architettura a file è la semplicità con cui puoi spostare le configurazioni tra diversi siti (ad esempio da un ambiente di test a uno di produzione):
 
-## 🛠️ Note Tecniche
-Il modulo utilizza gli hook nativi di PrestaShop:
-- `displayHeader`: per l'iniezione del CSS e del codice dell'Header.
-- `displayFooter`: per l'iniezione del codice nel Body (fine pagina).
-- `displayBackOfficeHeader`: per la personalizzazione estetica dell'area di configurazione.
+    Copia i file: Vai nella cartella /modules/osacustomcode/code/ del primo sito.
 
-I dati vengono salvati in modo sicuro nella tabella `ps_configuration`, garantendo la persistenza anche durante gli aggiornamenti del tema.
+    Incolla i file: Copia i file .txt (es. head_js.txt, css_global.txt) nella stessa cartella del secondo sito.
 
----
-*Powered by OsaComunicare - Esperti in comunicazione e sviluppo e-commerce.*
+    Pronto all'uso: Il secondo sito applicherà immediatamente tutte le direttive, a patto che il modulo OSA Custom Code sia installato. Non dovrai più ricopiare manualmente il codice campo per campo.
+
+✨ Caratteristiche principali
+
+L'interfaccia è suddivisa in tre sezioni ottimizzate con il Verde OSA (#5F8C5E):
+1. CSS
+
+    Finestra dedicata esclusivamente alle direttive estetiche.
+
+    Iniezione automatica nel tag <style> in modo trasparente.
+
+2. HEADER
+
+    HTML/Meta: Ideale per Verification Tags, JSON-LD e Meta Tag SEO.
+
+    JavaScript: Finestra separata per script che devono risiedere obbligatoriamente nel <head>.
+
+3. BODY / FOOTER
+
+    HTML: Per widget o elementi visivi a fine pagina.
+
+    JavaScript: Perfetto per Pixel di tracciamento (Facebook, Google Analytics) da caricare prima della chiusura del tag </body>.
+
+🚀 Installazione e Manutenzione
+
+    Carica la cartella osacustomcode nella directory /modules/ del tuo PrestaShop.
+
+    Installa il modulo dal backoffice.
+
+    Permessi: Assicurati che la cartella /code/ all'interno del modulo abbia i permessi di scrittura (CHMOD 755 o 775) per permettere il salvataggio dei file.
+
+🛠️ Note Tecniche
+
+Il modulo utilizza gli hook nativi per la massima compatibilità:
+
+    displayHeader: per CSS e Header Code.
+
+    displayFooter: per l'iniezione nel Body.
+
+    displayBackOfficeHeader: per l'interfaccia brandizzata OSA.
+
+OsaComunicare - Diamo forza alle tue idee con soluzioni tecniche senza compromessi.
