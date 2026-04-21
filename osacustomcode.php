@@ -17,7 +17,7 @@ class OsaCustomCode extends Module
         $this->name = 'osacustomcode';
         $this->tab = 'administration';
         $this->version = '3.1.0';
-        $this->author = 'DiaEvent';
+        $this->author = 'OsaComunicare';
         $this->need_instance = 0;
         $this->bootstrap = true;
 
