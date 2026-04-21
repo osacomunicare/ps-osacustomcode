@@ -1,15 +1,40 @@
 <?php
 /**
- * Modulo: OSA Custom Code for PrestaShop
- * Sviluppato da: OsaComunicare | https://osacomunicare.it | 800911329
- * Compatibilità: PrestaShop 8.x - 9.x
- * Descrizione: Gestione avanzata di Meta Tags, CSS e JavaScript.
+ * Modulo: OSA Custom Code
+ * Sviluppato da: OsaComunicare | https://osacomunicare.it
+ * Versione: 1.1.0 (DiaEvent Definitive)
+ * 2023-2026 OsaComunicare
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to http://www.prestashop.com for more information.
+ *
+ * @author    OsaComunicare <info@osacomunicare.it>
+ * @copyright 2023-2026 OsaComunicare
+ * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * @link      https://osacomunicare.it
  */
 
-if (!defined('_PS_VERSION_')) { exit; }
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 class OsaCustomCode extends Module
 {
+    protected $storage_path;
+
     public function __construct()
     {
         $this->name = 'osacustomcode';
@@ -21,45 +46,64 @@ class OsaCustomCode extends Module
 
         parent::__construct();
 
-        $this->displayName = $this->l('OSA Custom Code for PrestaShop');
-        $this->description = $this->l('Inserimento professionale di CSS, Header Code e Body Scripts.');
-        $this->ps_versions_compliancy = ['min' => '8.0.0', 'max' => '9.9.9'];
+        $this->displayName = $this->l('OSA Custom Code');
+        $this->description = $this->l('Inserimento professionale di CSS, Meta Tag e JavaScript con salvataggio su File System.');
+
+        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
+        $this->storage_path = _PS_MODULE_DIR_ . $this->name . '/code/';
     }
 
     public function install()
     {
-        return parent::install() &&
-            $this->registerHook('displayHeader') &&
-            $this->registerHook('displayFooter') &&
+        if (!file_exists($this->storage_path)) {
+            mkdir($this->storage_path, 0755, true);
+        }
+
+        if (!file_exists($this->storage_path . 'index.php')) {
+            file_put_contents($this->storage_path . 'index.php', '<?php header("Location: ../"); exit;');
+        }
+
+        return parent::install() && 
+            $this->registerHook('displayHeader') && 
+            $this->registerHook('displayFooter') && 
             $this->registerHook('displayBackOfficeHeader');
     }
 
-    public function uninstall()
+    private function getCodeFile($key)
     {
-        $keys = ['OSA_CSS_GLOBAL', 'OSA_HDR_HTML', 'OSA_HDR_JS', 'OSA_BDY_HTML', 'OSA_BDY_JS'];
-        foreach ($keys as $key) { Configuration::deleteByName($key); }
-        return parent::uninstall();
+        $file = $this->storage_path . $key . '.txt';
+        return file_exists($file) ? file_get_contents($file) : '';
+    }
+
+    private function saveCodeFile($key, $content)
+    {
+        if (!file_exists($this->storage_path)) {
+            mkdir($this->storage_path, 0755, true);
+        }
+        $clean_content = stripslashes($content);
+        return file_put_contents($this->storage_path . $key . '.txt', $clean_content);
     }
 
     public function hookDisplayBackOfficeHeader()
     {
         if (Tools::getValue('configure') == $this->name) {
             return '<style>
+                /* Identità Visiva OSA */
+                .panel { border-top: 5px solid #5F8C5E !important; }
+                .panel-heading { color: #5F8C5E !important; text-transform: uppercase !important; font-weight: bold !important; }
+                .btn-default.pull-right { background-color: #5F8C5E !important; border-color: #5F8C5E !important; color: white !important; text-shadow: none !important; }
+                .btn-default.pull-right:hover { background-color: #4a6d49 !important; }
+                
+                /* Area Codice */
                 .osa-code-area { 
-                    font-family: "Fira Code", "Courier New", monospace !important; 
-                    background-color: #ffffff !important; 
-                    color: #333333 !important; 
-                    padding: 15px !important; 
-                    border: 1px solid #ccc !important;
-                    border-left: 6px solid #5F8C5E !important; 
-                    min-height: 280px !important;
-                    line-height: 1.5 !important;
-                    margin-bottom: 10px;
+                    font-family: "Courier New", Courier, monospace !important; 
+                    background-color: #f1f2f6 !important; 
+                    border-left: 5px solid #5F8C5E !important;
+                    min-height: 180px !important;
+                    font-size: 13px !important;
+                    color: #2c3e50 !important;
                 }
-                .nav-tabs li a { font-weight: bold !important; color: #555 !important; text-transform: uppercase; }
-                .nav-tabs li.active a { border-bottom: 3px solid #5F8C5E !important; color: #5F8C5E !important; }
-                .panel-heading { background-color: #f9f9f9 !important; font-weight: bold !important; border-bottom: 1px solid #ddd !important; }
-                .help-block { color: #666 !important; font-style: italic; }
+                .help-block { font-style: italic; color: #666 !important; }
             </style>';
         }
     }
@@ -67,117 +111,117 @@ class OsaCustomCode extends Module
     public function getContent()
     {
         $output = '';
-        if (Tools::isSubmit('submit' . $this->name)) {
-            $keys = ['OSA_CSS_GLOBAL', 'OSA_HDR_HTML', 'OSA_HDR_JS', 'OSA_BDY_HTML', 'OSA_BDY_JS'];
-            foreach ($keys as $key) {
-                Configuration::updateValue($key, Tools::getValue($key), true);
-            }
-            $output .= $this->displayConfirmation($this->l('Configurazione salvata correttamente.'));
+
+        if (Tools::isSubmit('submitOsaSave')) {
+            $this->saveCodeFile('css_global', $_POST['OSA_CSS_G']);
+            $this->saveCodeFile('head_html', $_POST['OSA_H_HT']);
+            $this->saveCodeFile('head_js', $_POST['OSA_H_JS']);
+            $this->saveCodeFile('body_html', $_POST['OSA_B_HT']);
+            $this->saveCodeFile('body_js', $_POST['OSA_B_JS']);
+            
+            $output .= $this->displayConfirmation($this->l('Impostazioni OSA salvate con successo.'));
         }
+
         return $output . $this->renderForm();
     }
 
     public function renderForm()
     {
-        $fields_form = [];
-        $tabs = [
-            'css_tab'  => $this->l('CSS'),
-            'hdr_tab'  => $this->l('HEADER'),
-            'bdy_tab'  => $this->l('BODY'),
-        ];
+        $fields_form = array();
 
-        // --- SCHEDA CSS ---
-        $fields_form[0]['form'] = [
-            'legend' => ['title' => $this->l('Personalizzazioni CSS'), 'icon' => 'icon-css3'],
-            'input' => [
-                [
-                    'type' => 'textarea', 
-                    'label' => $this->l('Direttive CSS Globali'), 
-                    'name' => 'OSA_CSS_GLOBAL', 
-                    'class' => 'osa-code-area', 
-                    'tab' => 'css_tab', 
-                    'desc' => $this->l('Inserisci il codice CSS senza tag <style>. Impatta su tutto il sito.')
-                ],
-            ],
-            'submit' => ['title' => $this->l('Salva modifiche'), 'class' => 'btn btn-primary pull-right'],
-            'tabs' => $tabs
-        ];
+        // SEZIONE CSS
+        $fields_form[0]['form'] = array(
+            'legend' => array('title' => $this->l('Personalizzazione CSS'), 'icon' => 'icon-paint-brush'),
+            'input' => array(
+                array(
+                    'type' => 'textarea',
+                    'label' => $this->l('CSS GLOBALE'),
+                    'name' => 'OSA_CSS_G',
+                    'class' => 'osa-code-area',
+                    'desc' => $this->l('Inserisci il CSS (senza tag <style>).')
+                ),
+            ),
+            'submit' => array('title' => $this->l('Salva tutto'), 'class' => 'btn btn-default pull-right')
+        );
 
-        // --- SCHEDA HEADER ---
-        $fields_form[1]['form'] = [
-            'legend' => ['title' => $this->l('Iniezione codice nell\'Header'), 'icon' => 'icon-header'],
-            'input' => [
-                [
-                    'type' => 'textarea', 
-                    'label' => $this->l('Codice Personalizzato (HTML/Meta)'), 
-                    'name' => 'OSA_HDR_HTML', 
-                    'class' => 'osa-code-area', 
-                    'tab' => 'hdr_tab'
-                ],
-                [
-                    'type' => 'textarea', 
-                    'label' => $this->l('Script Java (JavaScript)'), 
-                    'name' => 'OSA_HDR_JS', 
-                    'class' => 'osa-code-area', 
-                    'tab' => 'hdr_tab', 
-                    'desc' => $this->l('Inserire script completi di tag <script>.')
-                ],
-            ],
-            'submit' => ['title' => $this->l('Salva modifiche'), 'class' => 'btn btn-primary pull-right'],
-            'tabs' => $tabs
-        ];
+        // SEZIONE HEADER
+        $fields_form[1]['form'] = array(
+            'legend' => array('title' => $this->l('Iniezione Header'), 'icon' => 'icon-arrow-up'),
+            'input' => array(
+                array(
+                    'type' => 'textarea',
+                    'label' => $this->l('META TAGS / HTML'),
+                    'name' => 'OSA_H_HT',
+                    'class' => 'osa-code-area',
+                    'desc' => $this->l('Tag <meta>, link o HTML da inserire nel <head>.')
+                ),
+                array(
+                    'type' => 'textarea',
+                    'label' => $this->l('JAVASCRIPT HEADER'),
+                    'name' => 'OSA_H_JS',
+                    'class' => 'osa-code-area',
+                    'desc' => $this->l('Includi i tag <script>.')
+                ),
+            ),
+            'submit' => array('title' => $this->l('Salva tutto'), 'class' => 'btn btn-default pull-right')
+        );
 
-        // --- SCHEDA BODY ---
-        $fields_form[2]['form'] = [
-            'legend' => ['title' => $this->l('Iniezione codice nel Body'), 'icon' => 'icon-code'],
-            'input' => [
-                [
-                    'type' => 'textarea', 
-                    'label' => $this->l('Codice Personalizzato (HTML)'), 
-                    'name' => 'OSA_BDY_HTML', 
-                    'class' => 'osa-code-area', 
-                    'tab' => 'bdy_tab'
-                ],
-                [
-                    'type' => 'textarea', 
-                    'label' => $this->l('Script Java (JavaScript)'), 
-                    'name' => 'OSA_BDY_JS', 
-                    'class' => 'osa-code-area', 
-                    'tab' => 'bdy_tab', 
-                    'desc' => $this->l('Ideale per pixel di tracciamento e script fine pagina.')
-                ],
-            ],
-            'submit' => ['title' => $this->l('Salva modifiche'), 'class' => 'btn btn-primary pull-right'],
-            'tabs' => $tabs
-        ];
+        // SEZIONE BODY
+        $fields_form[2]['form'] = array(
+            'legend' => array('title' => $this->l('Iniezione Body / Footer'), 'icon' => 'icon-code'),
+            'input' => array(
+                array(
+                    'type' => 'textarea',
+                    'label' => $this->l('HTML BODY'),
+                    'name' => 'OSA_B_HT',
+                    'class' => 'osa-code-area',
+                    'desc' => $this->l('Codice HTML da inserire a fine pagina.')
+                ),
+                array(
+                    'type' => 'textarea',
+                    'label' => $this->l('JAVASCRIPT BODY'),
+                    'name' => 'OSA_B_JS',
+                    'class' => 'osa-code-area',
+                    'desc' => $this->l('Includi i tag <script>.')
+                ),
+            ),
+            'submit' => array('title' => $this->l('Salva tutto'), 'class' => 'btn btn-default pull-right')
+        );
 
         $helper = new HelperForm();
         $helper->module = $this;
         $helper->name_controller = $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
         $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
-        $helper->default_form_language = (int)Configuration::get('PS_LANG_DEFAULT');
-        $helper->show_toolbar = false;
+        $helper->submit_action = 'submitOsaSave';
         
-        $helper->fields_value = [
-            'OSA_CSS_GLOBAL' => Configuration::get('OSA_CSS_GLOBAL'),
-            'OSA_HDR_HTML'   => Configuration::get('OSA_HDR_HTML'),
-            'OSA_HDR_JS'     => Configuration::get('OSA_HDR_JS'),
-            'OSA_BDY_HTML'   => Configuration::get('OSA_BDY_HTML'),
-            'OSA_BDY_JS'     => Configuration::get('OSA_BDY_JS'),
-        ];
+        $helper->fields_value = array(
+            'OSA_CSS_G' => $this->getCodeFile('css_global'),
+            'OSA_H_HT'  => $this->getCodeFile('head_html'),
+            'OSA_H_JS'  => $this->getCodeFile('head_js'),
+            'OSA_B_HT'  => $this->getCodeFile('body_html'),
+            'OSA_B_JS'  => $this->getCodeFile('body_js'),
+        );
 
         return $helper->generateForm($fields_form);
     }
 
-    public function hookDisplayHeader() {
-        $html = Configuration::get('OSA_HDR_HTML') . Configuration::get('OSA_HDR_JS');
-        $css  = Configuration::get('OSA_CSS_GLOBAL');
-        if (!empty($css)) { $html .= '<style>' . $css . '</style>'; }
-        return $html;
+    public function hookDisplayHeader()
+    {
+        $css = $this->getCodeFile('css_global');
+        $html_head = $this->getCodeFile('head_html');
+        $js_head = $this->getCodeFile('head_js');
+
+        $output = $html_head . $js_head;
+        if (!empty($css)) {
+            $output .= "\n" . '<style type="text/css">' . "\n" . $css . "\n" . '</style>' . "\n";
+        }
+
+        return $output;
     }
 
-    public function hookDisplayFooter() {
-        return Configuration::get('OSA_BDY_HTML') . Configuration::get('OSA_BDY_JS');
+    public function hookDisplayFooter()
+    {
+        return $this->getCodeFile('body_html') . $this->getCodeFile('body_js');
     }
 }
